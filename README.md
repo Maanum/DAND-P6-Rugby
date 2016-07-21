@@ -25,7 +25,93 @@ The first two are self-explanatory, the third is somewhat important for rugby
 as Tier 1 teams (the traditional powerhouses) historically have routed the Tier 2
 teams in competition, and there are arguments to keep the WC small because of this.
 
-The feedback I received covered two main concerns:
+As there was a lot of information for the user, I wanted to try to simplify the 
+component parts as much as possible and keep it all on one page.
+
+**Timeline:**
+	*Initial*: Though the viz focuses on how rugby has expanded in the WC era, I also
+	wanted to convey how the expansion has accelerated significantly over the previous
+	150 years by juxtaposing these timeframes in one timeline.  So the timeline will
+	show the full history of rugby with the WC era comprising only the last 30 years.
+	Once the timeline runs through, the timeline will focus on the WC events only to
+	allow the user to review each event individually with updates to the following charts.
+
+	*Feedback*: Users reported wanting more control to view the full timeline.  A 'pause' or
+	'next' button was suggested, but thought these might be too cumbersome and preferred 
+	a hands-off experience.  To address concerns I decided to allow the user to toggle
+	back to the full timeline view with a click of a button.  Additional feedback indicated
+	confusion between what event was shown in the timeline and what was on the map (e.g. 
+	a pre-WC event was selected but the map was still showing WC data).  To help 
+	clarify, I added a "World Cup Era" indicator on the timeline, which actually helps
+	my initial decision to show how the World Cup era is a small portion of the full
+	history of rugby.
+
+**Audience chart**: 
+	*Initial*: I decided to use a single-axis bubble chart with bubble size
+	indicating viewership as this was a simple way to show how generally how viewership
+	has gotten much greater.  Initially I planned to align the time axis to the goal 
+	differential time axis (perhaps sharing it) so the user didn't have to process 
+	two separate elements showing the same thing (passage of time), but eventually 
+	decided to merge this with the timeline as I could re-use the timeline space to 
+	convey this additional information (so, instead of timeline being 8 rect. buttons 
+	left to right it would be the 8 bubbles with the additional size information).
+	Colors are used for interactivity purposes, not to distinguish data.  "Red" was
+	selected for the "active" year as most users would associate red with an "active"
+	element.
+	
+	*Feedback*: Initially I thought to put no legend or labels to keep a streamlined
+	view as the general message was still clear ('viewership is increasing').  However,
+	the users thought this distracting, so I put floating labels on each point.
+	
+**Map**:
+	*Initial*: I wanted to use a map to show the expansion of teams competing the WC
+	for two reasons:
+		1. A map is more visceral for users, if I can use that term.  Actually seeing
+			participation spread across the globe will have more impact and remain in 
+			the users mind longer rather than providing quantitative data only.
+		2. The world map is a well understood representation for any viewer, so the 
+			information can be processed more quickly and the viewer can make their own
+			connections.  Saying that 16 teams competed in the first WC is one thing, 
+			but when a viewer can see that a quarter of those were from the British 
+			Isles alone that adds another dimension to the story.
+			
+		Regarding colors and breakdown of the categories, I wanted to focus on total
+		participation only.  Results and performance are secondary to the story so 
+		the presentation doesn't focus on this, but there is some information there 
+		as it would be interesting to the viewer.  As such, I decided to make 
+		"competing" different shades of the same color (blue) and "did not compete"
+		countries gray (most users already identifying gray as generally indicating 
+		'not active', 'no data', etc....).  The different shades of blue also make 
+		the map viewable by colorblind persons.
+		
+	*Feedback*: In the legend I originally did not include an indicator for "did not
+	compete".  There was some confusion as to which countries were competing and which
+	were not, so I updated the legend to indicate "Competing, [RESULT]" for all 
+	competing countries and "Did Not Compete" for the non-competing countries.
+	Additionally, after adding the full timeline view, when a viewer selected a 
+	non-WC event the map was still showing the best all-time WC performance which 
+	was confusing.  I changed the map to show no countries competing and indicating
+	that it was before the WC era.
+	
+**Points Difference Chart**:
+	*Initial*: The main goal of this chart was to show points differential of games 
+	decreasing over time.  I chose a scatterplot to show the points difference value
+	decreasing (y-axis) as time goes on (x-axis).  This is a common chart type, so 
+	it will be easily understood by viewers. 
+	I wanted to show both individual games and average differences for the World Cup.  
+	The individual games would show some of the outliers for how much blowouts were 
+	a factor in some WCs (and it's generally interesting to see specific games/results).  
+	The average shows the meat of the chart which is that the points differences are 
+	going down on average: the World Cup is getting more competitive.  
+	As I wanted to show a trend I added a line to connect the avg. points to make 
+	it easier for the viewer to see.  I used two different colors to distinguish 
+	between the two types of data, selectingthe same two colors as the rest of the 
+	charts for continuity.
+
+	*Feedback*: There was a technical issue with the scale not updating after the 
+	introduction of the "full timeline" view, so that was corrected.
+
+Two main points of feedback I received initially covered the following concerns:
 
   1. **Timeline speed and behaviour**:  In the initial draft, the timeline started 
 	   automatically and the viewer usually wasn't preparted for it.  Additionally

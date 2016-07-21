@@ -47,8 +47,11 @@
 				font-size: 10px;
 				font-weight: 500;
 				font-family: nyt-franklin,arial,helvetica,sans-serif;
-				padding: 10px;
-				margin-left: 5px;
+				margin: 5px 5px;
+				height: 20px;
+			}
+			text {
+				pointer-events:none;
 			}
 			
 			text.legend {
@@ -264,7 +267,7 @@
 					// Create x-axis scale
 					var x = d3.time.scale()
 						.range([margin, width])
-						.domain(diffChartTimeExtent);
+						.domain(worldCupTimeExtent);
 
 					// Create y-axis scale
 				 	var y = d3.scale.linear()
@@ -364,7 +367,7 @@
 						.attr('class', 'legend')
 						.attr('transform', 'translate(20,' + heightMap / 1.25 + ')')
 						.selectAll('g')
-						.data(['Champion', 'World Cup Final', 'Qualifying Round'])
+						.data(['Competed, Champion', 'Competed, Reached Final Round', 'Competed, Qualifiers Only', 'Did Not Compete'])
 						.enter().append('g');
 						
 					// Add legend
@@ -375,12 +378,14 @@
 						.attr('width', 10)
 						.attr('height', 10)
 						.attr('fill', function(d) {
-							if (d == 'Champion') {
+							if (d == 'Competed, Champion') {
 								return C_MAP_CHAMP;
-							} else if (d == 'World Cup Final') {
+							} else if (d == 'Competed, Reached Final Round') {
 								return C_MAP_FINAL;
-							} else {
+							} else if (d == 'Competed, Qualifiers Only') {
 								return C_MAP_QUAL;
+							} else {
+								return C_MAP_NOCOMPETE;
 							}
 						})
 						.style('stroke', 'black')
@@ -405,12 +410,17 @@
 				 */
 				function update_map(year) {
 					
-					// Check whether a specific year or "all-time" is needed.
-					// Populate year_perf with appropriate result for countries
+					// Populate map based on passed variable with the following cases:
+					//   1. Year passed: Populate with that year's WC performance
+					//   2. 'false' passed: Populate all countries as "no compete"
+					//   3. 'null' passed: Populate all-time best WC performance
 					
 					var year_perf = {};
-
-					if (year != null) {
+					
+					if (year === false) {
+						d3.select('#map .chart_title')
+							.text('Before World Cup Era');
+					} else if (year != null) {
 						var col_val = year.getUTCFullYear();
 						d3.select('#map .chart_title')
 							.text(year.getUTCFullYear() + ' World Cup Performance by Country');
@@ -426,8 +436,9 @@
 					
 					// Highlight countries based on performance
 					function fill_country(d) {
-
-						if(year_perf[d.properties.name] == 'DNQ') {
+						if (year === false) {
+							return C_MAP_NOCOMPETE
+						} else if(year_perf[d.properties.name] == 'DNQ') {
 							return C_MAP_QUAL;
 						} else if (year_perf[d.properties.name] == '1st') {
 							return C_MAP_CHAMP;
@@ -467,6 +478,25 @@
 						.append('g')
 							.attr('class','chart');
 
+					var gWCEra = svgTL.append('g')
+					
+					var gWCEraRect =  gWCEra.append('rect')
+											.attr('x', 0)
+											.attr('y', 0)
+											.attr('width', 0)
+											.attr('height', heightTimeline * .67)
+											.attr('fill', 'lightCoral')
+											.style('stroke-width', 0)
+											.attr('opacity', 0);			
+							
+					var gWCEraText = gWCEra.append('text')
+											.attr('y', 0)
+											.attr('x', 0)
+											.text('World Cup Era')
+											.attr('opacity', 0)
+											.attr("font-family", "nyt-franklin,arial,helvetica,sans-serif;")
+											.attr("font-size", "10px");;
+							
 					d3.select(".button.start circle")
 						.transition().duration(250)
 						.attr('fill', 'lightCoral');
@@ -480,10 +510,12 @@
 						.transition().duration(250)
 						.attr('opacity', 0);
 						
-					svgTL.selectAll('.eventCircle')
+					var gEvent = svgTL.selectAll('g')
 						.data(data)
 						.enter()
-						.append('circle')
+						.append('g');
+						
+					gEvent.append('circle')
 						.attr('class', 'eventCircle');
 
 					var timeline_x_scale = d3.time.scale()
@@ -505,6 +537,7 @@
 						.transition().duration(500)
 						.attr('opacity', 1);
 
+					
 					/* 
 					 *  Use setInterval to run through all events.
 					 *  For World Cup events, slow down and show map / diff chart 
@@ -536,11 +569,22 @@
 
 								// if at the end of the events, then move on to interactive portion
 								if(idx >= data.length) {
-									
+
 									clearInterval(wc_interval);
 									
 									setTimeout(function(){
 										
+
+										gEvent.append("text")
+												.attr('y', (heightTimeline / 3) + 4)
+												.attr("text-anchor", "middle")
+												.text(function(d) {
+													return (d.wc_tv_audience/1000).toPrecision(2);
+												})
+												.attr("font-family", "nyt-franklin,arial,helvetica,sans-serif;")
+												.attr("font-size", "12px");
+
+									
 										d3.selectAll('.eventCircle')
 											.attr('fill', C_TIMELINE_INACTIVE)
 											.attr('opacity', 1);
@@ -549,12 +593,15 @@
 										//   captions/controls to show only World Cup events
 										function timelineWorldCupScale() {
 											
+											gWCEra.selectAll("rect").attr('opacity', 0);
+											gWCEra.selectAll("text").attr('opacity', 0);
+											
 											d3.selectAll('#timeline .chart_title')
 												.transition().duration(500)
-												.text(stdAudienceTitle)
+												.text(stdAudienceTitle);
 											d3.selectAll('#timeline .chart_text')
 												.transition().duration(500)
-												.text(stdAudienceText)
+												.text(stdAudienceText);
 												
 											d3.select(".button.left").attr('opacity', 1);
 											d3.select(".button.right").attr('opacity', 0);
@@ -571,9 +618,19 @@
 														timeline_x_scale.domain(i(t));
 														gAxis.call(timeline_x_axis);
 														svgTL.selectAll('.eventCircle').attr('cx', function(d) {return timeline_x_scale(d['date']);})
+														gEvent.selectAll('text')
+															.attr('x', function(d) {
+																if (d.wc_tv_audience > 2000) {
+																	return timeline_x_scale(d['date']);
+																} else {
+																	return timeline_x_scale(d['date']) + 18;
+																}
+															})
 													}
 												});
 
+											gEvent.selectAll("text").attr('opacity', 1);
+												
 											timeline_x_axis.tickValues(years);
 
 											// Create TV audience scale (area of circles)
@@ -585,18 +642,21 @@
 												.domain([0, audience_max])
 												.range([0, 15]);	
 
-											d3.selectAll('.eventCircle')
-												.filter(function(d) { return d['wc'] == 1;})
+											var wcCircles = d3.selectAll('.eventCircle')
+												.filter(function(d) { return d['wc'] == 1;});
+												
+											wcCircles
 													.transition().duration(500)
-													.attr('r', function(d) {
-														return radius(d['wc_tv_audience']);
-													});
+														.attr('r', function(d) {
+															return radius(d['wc_tv_audience']);
+														})
 										}
 
 										// This function will update the timeline and supporting
 										//   captions/controls to show all events
 										function timelineAllTimeScale() {
 											
+											gEvent.selectAll('text').attr('opacity', 0);
 											d3.selectAll('#timeline .chart_title')
 												.transition().duration(500)
 												.text(stdTimelineTitle)
@@ -610,6 +670,26 @@
 											// Change x-axis to focus on WC span of years
 											var cur_domain = [formatYears.parse('1986'), formatYears.parse('2016')]
 											var new_domain = [formatYears.parse('1829'), formatYears.parse('2016')]
+											
+											var xScale = d3.time.scale()
+												.range([margin, width])
+												.domain(new_domain);
+											
+											var wcEraStart = xScale(formatYears.parse('1987'));
+											var wcEraEnd = xScale(formatYears.parse('2015'));
+
+											gWCEra.selectAll("rect")
+												.attr('x', wcEraStart - (heightTimeline / 8))
+												.attr('width', wcEraEnd - wcEraStart + (heightTimeline / 4))
+												.attr('opacity', .5);
+											
+											gWCEra.selectAll("text")
+												.attr("text-anchor", "middle")
+												.attr('x', wcEraStart + ((wcEraEnd - wcEraStart) / 2))
+												.attr('y', (heightTimeline / 6))	
+												.attr('opacity', 1);
+											
+
 											var gAxis = d3.selectAll('#timeline g.x.axis');
 											gAxis
 												.transition().duration(500)
@@ -626,7 +706,7 @@
 
 											circles
 												.transition().duration(500)
-												.attr('r', (heightTimeline / 8));
+												.attr('r', (heightTimeline / 8));											
 												
 											
 										}
@@ -716,13 +796,21 @@
 												.attr('stroke-width', 1);
 											})
 											.on('click', function(d) {
-										
+												d3.select('#map .chart_summary')
+													.text(stdMapText);
+													
+												d3.select('#diffChart .chart_title')
+														.text(stdDiffChartTitle);
+														
 											// if Circle was inactive, update viz to display circle's year
 												if (d3.select(this).attr('fill') == C_TIMELINE_INACTIVE) {
 													
 													// Refresh event comments to proper year
 													d3.select('#comment')
 														.text(d.notes);
+
+													d3.select('#diffChart .chart_title')
+														.text("Points Differences in the " + (d.date).getUTCFullYear() +" World Cup Games");
 													
 													// Update circles to show which is active
 													circles
@@ -768,7 +856,32 @@
 															.transition().duration(500)	
 															.attr('opacity', 0);
 													} else {
-														update_map();
+														update_map(false);
+														d3.select('#map .chart_summary')
+														.text("The first World Cup was held in 1987");
+														
+														var x = d3.time.scale()
+														.range([margin, width])
+														.domain(worldCupTimeExtent);
+													
+														var time_axis = d3.svg.axis()
+															.scale(x)
+															.tickSize(1)
+															.tickValues(yearsAvg)
+															.tickFormat(d3.time.format('%Y'));
+
+														d3.selectAll('#diffChart g.x.axis')
+														.transition().duration(500)	
+														.call(time_axis);
+														d3.selectAll('.gameCircle')
+															.transition().duration(500)	
+															.attr('cx', function(d) {return x(d['Date']);});
+														d3.selectAll('.avgCircle')
+															.transition().duration(500)	
+															.attr('opacity', 1);
+														d3.selectAll('#diffChart path.line')
+															.transition().duration(500)	
+															.attr('opacity', 1);
 													}
 												
 												// if Circle was active, revert viz to display all time perf.
@@ -790,7 +903,7 @@
 													// Update scale/axis for diff chart
 													var x = d3.time.scale()
 														.range([margin, width])
-														.domain(diffChartTimeExtent);
+														.domain(worldCupTimeExtent);
 													
 													var time_axis = d3.svg.axis()
 														.scale(x)
@@ -868,7 +981,7 @@
 						d3.select('#comment')
 							.transition().duration(250)
 							.style('color','black');
-
+						
 						// Add new timeline event marker with "active" display
 						svgTL.selectAll('.eventCircle')
 							.filter(function(d) { 
@@ -896,7 +1009,7 @@
 									.style('border-bottom', '1px solid lightgrey');
 								d3.selectAll('#diffChart .chart_title')
 									.transition().duration(500)
-									.text('Points Difference in World Cup Games')
+									.text(stdDiffChartTitle)
 								d3.selectAll('#map svg')
 									.transition().duration(500)
 									.style('opacity', 1)
@@ -937,7 +1050,7 @@
 				var stdIntroText = "For most of its over 170-year existence rugby has " +
 					"enjoyed popularity mainly in Commonwealth nations only.  However " +
 					"with the advent of the Rugby World Cup in 1987 rugby has increasingly" +
-					" become globally more popular and competitive.  This is the story of " +
+					"become globally more popular and competitive.  This is the story of " +
 					"rugby becoming a world sport."
 				var stdCommentText = "Rugby's global expansion can be seen below in 1." +
 					"the increase in global TV audience of the World Cup, 2. increased " +
@@ -951,19 +1064,22 @@
 					"new teams competing and expanding the tournament to 20 teams there " +
 					"has been a steady decline of points gaps."
 				var stdTimelineText = "Click on a year to show event details or click " +
-					"the right arrow to show World Cups only."
+					"the right arrow to show the World Cups Global TV Audience view."
 				var stdTimelineTitle = 'Timeline'
-				var stdAudienceText = "Click on a year to show details of that World Cup" +
-					" or click the left arrow to display full timeline."
-				var stdAudienceTitle = 'Global Television Audience for World Cup'
+				var stdAudienceText = "The global television audience has increased from" +
+					" 3 million in 1987 to 4 billion in 2015.  Click on a year to show " +
+					"details of that World Cup or click the left arrow to switch to " + 
+					" the timeline view."
+				var stdAudienceTitle = 'Global Television Audience (in billions of viewers)'
+				var stdDiffChartTitle = 'Points Difference in all World Cup Games'
 				
 				d3.select('#comment').text(stdIntroText);
 				d3.selectAll('#timeline .chart_summary').text(' ')	
 				d3.selectAll('#timeline .chart_title').text(' ')	
 				
 				// Set timeline event speeds
-					var timelineSpeed = 5000;
-					var timelineWCSpeed = 10000; 
+					var timelineSpeed = 500;
+					var timelineWCSpeed = 500; 
 				
 				/** Visualization size controls */
 				/** @const */ var margin = 25,
@@ -998,7 +1114,7 @@
 					yearsFullTimeline.push(formatYears.parse(i.toString()));
 				};
 				
-				var diffChartTimeExtent = [formatYears.parse('1986'), formatYears.parse('2016')];
+				var worldCupTimeExtent = [formatYears.parse('1986'), formatYears.parse('2016')];
 
 				/** Create tooltip for diffchart */
 				var div = d3.select('body').append('div')   
