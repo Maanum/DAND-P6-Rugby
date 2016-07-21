@@ -7,8 +7,8 @@ a few countries, mostly within the Commonwealth.  However, with the advent of th
 Rugby World Cup and the professional era, the game is enjoying quick gains in 
 global popularity.  This is shown in three charts:
   1. Increasing global TV audience for the World Cups
-	2. Increasing participation for the World Cups
-	3. Closer games in the World Cups as Tier 2 nations become as compentent as
+  2. Increasing participation for the World Cups
+  3. Closer games in the World Cups as Tier 2 nations become as compentent as
      Tier 1 teams.
 
 ##Design
@@ -35,7 +35,6 @@ component parts as much as possible and keep it all on one page.
 	show the full history of rugby with the WC era comprising only the last 30 years.
 	Once the timeline runs through, the timeline will focus on the WC events only to
 	allow the user to review each event individually with updates to the following charts.
-
 	*Feedback*: Users reported wanting more control to view the full timeline.  A 'pause' or
 	'next' button was suggested, but thought these might be too cumbersome and preferred 
 	a hands-off experience.  To address concerns I decided to allow the user to toggle
@@ -58,7 +57,6 @@ component parts as much as possible and keep it all on one page.
 	Colors are used for interactivity purposes, not to distinguish data.  "Red" was
 	selected for the "active" year as most users would associate red with an "active"
 	element.
-	
 	*Feedback*: Initially I thought to put no legend or labels to keep a streamlined
 	view as the general message was still clear ('viewership is increasing').  However,
 	the users thought this distracting, so I put floating labels on each point.
@@ -74,7 +72,6 @@ component parts as much as possible and keep it all on one page.
 			connections.  Saying that 16 teams competed in the first WC is one thing, 
 			but when a viewer can see that a quarter of those were from the British 
 			Isles alone that adds another dimension to the story.
-			
 		Regarding colors and breakdown of the categories, I wanted to focus on total
 		participation only.  Results and performance are secondary to the story so 
 		the presentation doesn't focus on this, but there is some information there 
@@ -83,7 +80,6 @@ component parts as much as possible and keep it all on one page.
 		countries gray (most users already identifying gray as generally indicating 
 		'not active', 'no data', etc....).  The different shades of blue also make 
 		the map viewable by colorblind persons.
-		
 	*Feedback*: In the legend I originally did not include an indicator for "did not
 	compete".  There was some confusion as to which countries were competing and which
 	were not, so I updated the legend to indicate "Competing, [RESULT]" for all 
@@ -107,7 +103,6 @@ component parts as much as possible and keep it all on one page.
 	it easier for the viewer to see.  I used two different colors to distinguish 
 	between the two types of data, selectingthe same two colors as the rest of the 
 	charts for continuity.
-
 	*Feedback*: There was a technical issue with the scale not updating after the 
 	introduction of the "full timeline" view, so that was corrected.
 
