@@ -509,12 +509,13 @@
 					d3.select(".button.start text")
 						.transition().duration(250)
 						.attr('opacity', 0);
-						
-					var gEvent = svgTL.selectAll('g')
+					
+
+					var gEvent = svgTL.selectAll('g .eventG')
 						.data(data)
 						.enter()
 						.append('g');
-						
+
 					gEvent.append('circle')
 						.attr('class', 'eventCircle');
 
@@ -984,7 +985,7 @@
 						
 						// Add new timeline event marker with "active" display
 						svgTL.selectAll('.eventCircle')
-							.filter(function(d) { 
+							.filter(function(d) {
 								return d['date'] == newYear;
 							})
 							.attr('cx', function(d) {
